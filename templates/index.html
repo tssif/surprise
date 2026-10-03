@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Для тебя ❤️</title>
+    <style>
+        /* ================================================
+           ОБЩИЕ СТИЛИ
+           ================================================ */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        html, body {
+            height: 100%;
+            overflow-x: hidden;
+        }
+
+        body {
+            font-family: 'Georgia', 'Times New Roman', serif;
+            color: #fff;
+            text-align: center;
+            background: linear-gradient(135deg, #0a0a0a, #0f2d1a, #000000, #103d22);
+            background-size: 400% 400%;
+            animation: gradientMove 14s ease infinite;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 16px;
+            min-height: 100vh;
+            min-height: 100dvh; /* для iPhone, чтобы учитывать адресную строку */
+            position: relative;
+        }
+
+        @keyframes gradientMove {
+            0%   { background-position: 0% 50%; }
+            50%  { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        /* ================================================
+           ПРОГРЕСС-БАР
+           ================================================ */
+        .progress-bar {
+           position: fixed;
+           top: 0;
+           left: 0;
+           width: 100%;
+           height: 4px;
+           background: rgba(255, 255, 255, 0.08);
+           z-index: 100;
+        }
+        .progress-fill {
+           height: 100%;
+           width: 0%;
+           background: linear-gradient(90deg, #00c853, #00ff7f, #00c853);
+           box-shadow: 0 0 12px rgba(0, 255, 100, 0.9);
+           border-radius: 0 4px 4px 0;
+           transition: width 0.6s ease;
+        }
+
+        /* ================================================
+           КАРТОЧКА
+           ================================================ */
+        .card {
+            background: rgba(20, 20, 20, 0.35);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            border-radius: 26px;
+            padding: 36px 24px;
+            max-width: 440px;
+            width: 100%;
+            box-shadow: 0 10px 44px rgba(0, 255, 0, 0.15);
+            border: 1px solid rgba(0, 255, 100, 0.25);
+            position: relative;
+            z-index: 2;
+        }
+
+        /* ================================================
+           ЭКРАНЫ (Шаги)
+           ================================================ */
+        .step {
+            display: none;
+            animation: fadeIn 0.7s ease;
+        }
+        .step.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(22px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        /* ================================================
+           ТИПОГРАФИКА
+           ================================================ */
+        h1 {
+            font-size: 1.75em;
+            margin-bottom: 16px;
+            line-height: 1.25;
+        }
+        p {
+            font-size: 1.08em;
+            line-height: 1.6;
+            margin-bottom: 18px;
+        }
+        .small {
+            font-size: 0.9em;
+            opacity: 0.85;
+        }
+
+        /* ================================================
+           КНОПКИ
+           ================================================ */
+        button {
+            background: #fff;
+            color: #0f2d1a;
+            border: none;
+            padding: 14px 34px;
+            border-radius: 50px;
+            font-size: 1.05em;
+            font-weight: bold;
+            font-family: inherit;
+            cursor: pointer;
+            transition: transform 0.15s, box-shadow 0.2s;
+            box-shadow: 0 5px 22px rgba(0, 255, 0, 0.35);
+            margin: 4px;
+        }
+        button:hover  { transform: scale(1.06); }
+        button:active { transform: scale(0.96); }
+
+        /* ================================================
+           ПОЛЕ ВВОДА (для загадки)
+           ================================================ */
+        input[type="text"] {
+            width: 100%;
+            padding: 14px 18px;
+            border-radius: 50px;
+            border: 2px solid rgba(0, 255, 100, 0.4);
+            background: rgba(255, 255, 255, 0.95);
+            color: #333;
+            font-size: 1.05em;
+            font-family: inherit;
+            text-align: center;
+            margin-bottom: 14px;
+            outline: none;
+        }
+        input[type="text"]:focus {
+            border-color: #00c853;
+            box-shadow: 0 0 14px rgba(0, 255, 100, 0.5)
+        }
+
+        /* ================================================
+           СЕРДЕЧКО (пульсирующее)
+           ================================================ */
+        .heart {
+            font-size: 3.4em;
+            display: inline-block;
+            animation: pulse 1.3s infinite;
+            margin-bottom: 10px;
+            line-height: 1;
+        }
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50%      { transform: scale(1.18); }
+        }
+
+        /* ================================================
+           СЧЁТЧИК КОМПЛИМЕНТОВ
+           ================================================ */
+        .counter {
+            font-size: 0.9em;
+            opacity: 0.85;
+            margin-top: 12px;
+            letter-spacing: 1px;
+        }
+
+        /* ================================================
+           ОСОБЕННЫЙ КОМПЛИМЕНТ (11-й)
+           ================================================ */
+        .special-compliment {
+            background: rgba(0, 255, 100, 0.12);
+            border: 1px solid rgba(0, 255, 100, 0.4);
+            border-radius: 20px;
+            padding: 26px 20px;
+            font-size: 1.22em;
+            line-height: 1.6;
+            font-style: italic;
+            animation: glowPulse 2.4s ease-in-out infinite;
+            box-shadow: 0 0 30px rgba(255, 255, 255, 0.6);
+            margin-bottom: 18px;
+        }
+        @keyframes glowPulse {
+            0%, 100% { box-shadow: 0 0 24px rgba(0, 255, 100, 0.4); }
+            50%      { box-shadow: 0 0 42px rgba(0, 255, 100, 0.85); }
+        }
+
+        /* ================================================
+           ВИДЕО
+           ================================================ */
+        .video-wrap {
+            position: relative;
+            width: 100%;
+            max-width: 320px;
+            margin: 0 auto 16px;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            background: #000;
+        }
+        .video-wrap video {
+            display: block;
+            width: 100%;
+            height: auto;
+        }
+        .sound-btn {
+            position: absolute;
+            bottom: 12px;
+            right: 12px;
+            background: rgba(255, 255, 255, 0.92);
+            color: #0f2d1a;
+            border: none;
+            padding: 10px 16px;
+            border-radius: 50px;
+            font-size: 0.95em;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 4px 14px rgba(0, 0, 0, 0.3);
+        }
+
+        /* ================================================
+           ЛЕТЯЩИЕ СЕРДЕЧКИ / ЧАСТИЦЫ
+           ================================================ */
+        .blob {
+            position: fixed;
+            border-radius: 50%;
+            filter: blur(70px);
+            opacity: 0.35;
+            z-index: 0;
+            pointer-events: none;
+            animation: blobFloat 20s ease-in-out infinite;
+        }
+        .blob-1 {
+            width: 260px; height: 260px;
+            background: #00c853;
+            top: -60px; left: -60px;
+        }
+        .blob-2 {
+                width: 220px; height: 220px;
+            background: #00ff7f;
+            bottom: -50px; right: -50px;
+            animation-delay: -7s;
+        }
+        .blob-3 {
+            width: 180px; height: 180px;
+            background: #00897b;
+            top: 40%; left: 60%;
+            animation-delay: -14s;
+        }
+            @keyframes blobFloat {
+            0%, 100%   { transform: translate(0, 0) scale(1); }
+            33%        { transform: translate(40px, -30px) scale(1.15); }
+            66%        { transform: translate(-30px, 30px) scale(0.95); }
+        }
+        .floating-heart {
+            position: fixed;
+            bottom: -40px;
+            font-size: 24px;
+            opacity: 0.85;
+            animation: floatUp linear forwards;
+            pointer-events: none;
+            z-index: 1;
+        }
+        @keyframes floatUp {
+            to {
+                transform: translateY(-110vh) rotate(360deg);
+                opacity: 0;
+            }
+        }
+    </style>
+</head>
+
+        <body>
+
+            <div class="blob blob-1"></div>
+            <div class="blob blob-2"></div>
+            <div class="blob blob-3"></div>
+
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+
+            <div class="card">
+
+        <!-- ==========================================
+             ШАГ 1: ПРИВЕТСТВИЕ + ЗАГАДКА
+             ========================================== -->
+        <div class="step active" id="step1">
+            <div class="heart">❤️</div>
+            <h1>Привет, зайка!</h1>
+            <p>Ты отсканировала QR-код…<br>но это только начало 😉</p>
+            <p>Сначала маленькая загадка:</p>
+            <p style="font-style: italic; opacity: 0.95;">
+                «Кто носит фирму ...
+                <br>Тот настоящий друг для нас
+                <br>Чего не хватает?»
+            </p>
+            <input type="text" id="riddleInput" placeholder="Напиши ответ…" autocomplete="off">
+            <br>
+            <button onclick="checkRiddle()">Проверить</button>
+            <p class="small" id="riddleHint" style="margin-top: 14px; min-height: 20px;"></p>
+        </div>
+
+        <!-- ==========================================
+             ШАГ 2: КОМПЛИМЕНТЫ
+             ========================================== -->
+        <div class="step" id="step2">
+            <h1>Теперь — только для тебя 💌</h1>
+            <p id="complimentText" style="font-size: 1.18em; min-height: 110px; display: flex; align-items: center; justify-content: center;">
+                Ты закусываешь губу, когда думаешь о чём-то… и я в этот момент забываю, о чём думал сам 😏
+            </p>
+            <button id="nextComplimentBtn" onclick="nextCompliment()">Ещё комплимент ✨</button>
+            <p class="counter" id="counter">1 / 10</p>
+        </div>
+
+        <!-- ==========================================
+             ШАГ 2.5: ОСОБЕННЫЙ КОМПЛИМЕНТ (11-й)
+             ========================================== -->
+        <div class="step" id="step2special">
+            <div class="heart">💖</div>
+            <h1>И самое главное…</h1>
+            <div class="special-compliment">
+                Пусть годы идут, а ты всё так же закусываешь губу, улыбаешься ямочками и сводишь меня с ума.<br>
+                Оставайся такой же бесподобной ❤️
+            </div>
+            <button onclick="goToStep(3)">Дальше →</button>
+        </div>
+
+        <!-- ==========================================
+             ШАГ 3: ВИДЕО
+             ========================================== -->
+        <div class="step" id="step3">
+            <h1>У меня для тебя кое-что есть 🎥</h1>
+            <div class="video-wrap">
+                <video id="giftVideo" src="/static/video.mp4" playsinline preload="metadata" loop></video>
+                <button class="sound-btn" id="soundBtn" onclick="toggleSound()">🔊 Включить звук</button>
+            </div>
+            <p class="small">Нажми на видео, чтобы включить</p>
+            <br>
+            <button onclick="goToStep(4)">Дальше →</button>
+        </div>
+
+        <!-- ==========================================
+             ШАГ 4: ФИНАЛ
+             ========================================== -->
+        <div class="step" id="step4">
+            <div class="heart">🎁</div>
+            <h1>А теперь…</h1>
+            <p style="font-size: 1.15em;">
+                Внутри — сюрприз из твоего любимого мира.<br>
+                И кое-что, что можно носить с собой.
+            </p>
+            <p style="font-size: 1.3em; margin-top: 20px;">
+                <b>Открывай, зайка!</b>
+            </p>
+            <button onclick="celebrate()">🤗 Обнять тебя</button>
+            <p class="small" style="margin-top: 22px; opacity: 0.9;">
+                Твой ангел в адидасе ❤️
+            </p>
+        </div>
+
+    </div>
+
+    <script>
+        /* ============================================================
+           1. ДАННЫЕ — комплименты и настройки
+           ============================================================ */
+
+        // Первые 9 комплиментов. 10-й покажем отдельно? Нет — у нас 10 обычных.
+        // Внимание: 1-й комплимент уже показан при входе в шаг 2 (в HTML),
+        // чтобы избежать "пустого" экрана. Значит в массиве — 9 следующих.
+        const compliments = [
+            "Твои ямочки, когда ты смущаешься или умиляешься — это моя личная слабость",
+            "Ты умеешь улыбаться так, что весь день становится добрее",
+            "Ты кажешься серьёзной и неприступной… но за этим прячется самая добрая девушка, которую я знаю",
+            "Ты смешная так, как умеют только по-настоящему близкие люди — без масок и притворства",
+            "Ты не показываешь это напоказ, но твоя доброта чувствуется в каждом поступке",
+            "Ты видишь во мне человека, а не обстоятельства. И это дороже любых слов",
+            "Ты не спрашиваешь, нужна ли помощь, — ты просто помогаешь",
+            "Ты умеешь создавать уют из ничего — из чая, из разговора, из простого «я рядом». С тобой даже обычный вечер становится особенным",
+            "У тебя взгляд, который может и рассмешить, и успокоить, и влюбить — всё за секунду. Я до сих пор не научился к этому привыкать"
+        ];
+
+        let currentIndex = 0; // индекс в массиве compliments
+
+        /* ============================================================
+           2. УПРАВЛЕНИЕ ЭКРАНАМИ
+           ============================================================ */
+
+        function goToStep(n) {
+            document.querySelectorAll('.step').forEach(el => el.classList.remove('active'));
+            const target = n === '2special'
+                ? document.getElementById('step2special')
+                : document.getElementById('step' + n);
+            if (target) target.classList.add('active');
+
+            // Обновляем прогресс-бар — но только если он есть
+            const fill = document.getElementById('progressFill');
+            if (fill) {
+                const progressMap = {
+                    1: 10,
+                    2: 30,
+                    '2special': 55,
+                    3: 75,
+                    4: 100
+                };
+                fill.style.width = (progressMap[n] || 0) + '%';
+            }
+
+            spawnHearts(6);
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        /* ============================================================
+           3. ЗАГАДКА ПРО ADIDAS
+           ============================================================ */
+
+        function checkRiddle() {
+            const input = document.getElementById('riddleInput').value.trim().toLowerCase();
+            const hint = document.getElementById('riddleHint');
+
+            // Принимаем: adidas, адидас (в любом регистре)
+            if (input === 'adidas' || input === 'адидас') {
+                hint.style.color = '#00ff7f';
+                hint.textContent = 'Правильно! Три полоски — и ты в деле 😎';
+                spawnHearts(20);
+                setTimeout(() => goToStep(2), 1500);
+            } else {
+                hint.style.color = '#ffb3b3';
+                hint.textContent = 'Не совсем 😊 Подумай про свой любимый бренд… три полоски 😉';
+            }
+        }
+
+        // Удобство: нажатие Enter в поле ввода
+        document.getElementById('riddleInput').addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') checkRiddle();
+        });
+
+        /* ============================================================
+           4. КОМПЛИМЕНТЫ
+           ============================================================ */
+
+        function nextCompliment() {
+            // если все обычные закончились → показываем особенный
+            if (currentIndex >= compliments.length) {
+                goToStep('2special');
+                return;
+            }
+
+            document.getElementById('complimentText').textContent = compliments[currentIndex];
+            currentIndex++;
+
+            // Счётчик: сейчас показан (currentIndex + 1)-й комплимент
+            // Но 1-й показан сразу при входе, поэтому формула такая:
+            const shown = currentIndex + 1; // 1..10
+            document.getElementById('counter').textContent = shown + ' / 10';
+
+            spawnHearts(4);
+
+            // Меняем текст кнопки на «Дальше», когда дошли до 10-го
+            if (currentIndex === compliments.length) {
+                document.getElementById('nextComplimentBtn').textContent = 'Ещё кое-что, так как четные числа для педиков';
+            }
+        }
+
+        /* ============================================================
+           5. ВИДЕО (iPhone-friendly)
+           ============================================================ */
+
+        const video = document.getElementById('giftVideo');
+        let soundOn = false;
+
+        function toggleSound() {
+            soundOn = !soundOn;
+            video.muted = !soundOn;
+            document.getElementById('soundBtn').textContent = soundOn ? '🔇 Выключить звук' : '🔊 Включить звук';
+            // если видео на паузе — запускаем
+            if (video.paused) video.play();
+        }
+
+        // При входе на шаг 3 — пробуем автоплей без звука (сработает на iPhone)
+        // Наблюдаем за переключением на шаг 3 через MutationObserver,
+        // чтобы не плодить отдельные функции.
+        const observer = new MutationObserver(() => {
+            const step3 = document.getElementById('step3');
+            if (step3.classList.contains('active')) {
+                video.muted = true;
+                soundOn = false;
+                document.getElementById('soundBtn').textContent = '🔊 Включить звук';
+                video.play().catch(() => {
+                    // автоплей заблокирован — ничего, пользователь нажмёт сам
+                });
+            }
+        });
+        document.querySelectorAll('.step').forEach(el => {
+            observer.observe(el, { attributes: true, attributeFilter: ['class'] });
+        });
+
+        // Тап по самому видео — toggle play/pause
+        video.addEventListener('click', () => {
+            if (video.paused) video.play();
+            else video.pause();
+        });
+
+        /* ============================================================
+           6. ЛЕТЯЩИЕ СЕРДЕЧКИ / ЧАСТИЦЫ
+           ============================================================ */
+
+        function spawnHearts(count) {
+            const emojis = ['💚', '🖤', '🌿', '⚡', '✅', '💚', '🖤', '✨'];
+            for (let i = 0; i < count; i++) {
+                const h = document.createElement('div');
+                h.className = 'floating-heart';
+                h.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+                h.style.left = Math.random() * 100 + 'vw';
+                h.style.animationDuration = (2.2 + Math.random() * 2.5) + 's';
+                h.style.fontSize = (16 + Math.random() * 16) + 'px';
+                h.style.animationDelay = (Math.random() * 0.4) + 's';
+                document.body.appendChild(h);
+                setTimeout(() => h.remove(), 5500);
+            }
+        }
+
+        /* ============================================================
+           7. ФИНАЛЬНЫЙ ЗАЛП
+           ============================================================ */
+
+        function celebrate() {
+            spawnHearts(70);
+        }
+
+        /* ============================================================
+           8. ЧТО-ТО ПРИ ЗАГРУЗКЕ
+           ============================================================ */
+
+        window.addEventListener('load', () => {
+                    setInterval(() => {
+            // 2 частицы каждые 1.2 секунды — ненавязчиво
+            spawnHearts(2);
+        }, 1200);
+            document.getElementById('progressFill').style.width = '10%';
+        });
+    </script>
+</body>
+</html>
