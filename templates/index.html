@@ -3,8 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&display=swap" rel="stylesheet">
     <title>Для тебя ❤️</title>
     <style>
+
         /* ================================================
            ОБЩИЕ СТИЛИ
            ================================================ */
@@ -84,17 +88,17 @@
            ЭКРАНЫ (Шаги)
            ================================================ */
         .step {
-            display: none;
-            animation: fadeIn 0.7s ease;
-        }
-        .step.active {
-            display: block;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(22px); }
-            to   { opacity: 1; transform: translateY(0); }
-        }
+    display: none;
+    position: relative;
+}
+.step.active {
+    display: block;
+    animation: fadeIn 0.7s ease;
+}
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(22px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
 
         /* ================================================
            ТИПОГРАФИКА
@@ -200,89 +204,410 @@
             50%      { box-shadow: 0 0 42px rgba(0, 255, 100, 0.85); }
         }
 
-        /* ================================================
-           ВИДЕО
-           ================================================ */
-        .video-wrap {
+                /* ================================================
+        ПАЗЛ
+        ================================================ */
+        .puzzle-wrap {
+    width: 100%;
+    max-width: 340px;
+    margin: 0 auto 16px;
+    padding: 6px;
+    background: rgba(0, 0, 0, 0.35);
+    border-radius: 18px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4), inset 0 0 20px rgba(0, 0, 0, 0.5);
+}
+
+.puzzle-inner {
+    position: relative;              /* точка отсчёта для absolute-фото */
+    width: 100%;
+    aspect-ratio: 1 / 1;             /* квадрат — как и сетка */
+    border-radius: 12px;
+    overflow: hidden;                /* чтобы фото не вылезало за скругления */
+}
+
+        /* Целое фото поверх собранного пазла */
+        .puzzle-whole {
+    position: absolute;
+    inset: 0;                     /* ровно по границам .puzzle-inner */
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 12px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 1.2s ease, transform 0.8s ease;
+    z-index: 10;
+}
+.puzzle-whole.show {
+    opacity: 1;
+    transform: scale(1.03);
+}
+
+        /* Когда показываем — плавно проявляется и чуть увеличивается */
+        .puzzle-whole.show {
+            opacity: 1;
+            transform: scale(1.03);
+        }
+
+        .puzzle-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    grid-template-rows: repeat(5, 1fr);
+    gap: 1px;
+    width: 100%;
+    height: 100%;                /* ← растягиваем на всю inner */
+    background: transparent;
+    border-radius: 12px;
+    overflow: hidden;
+    transition: box-shadow 0.6s ease;
+}
+
+        /* Ячейка пазла */
+        .puzzle-cell {
             position: relative;
-            width: 100%;
-            max-width: 320px;
-            margin: 0 auto 16px;
-            border-radius: 20px;
-            overflow: hidden;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-            background: #000;
-        }
-        .video-wrap video {
-            display: block;
-            width: 100%;
-            height: auto;
-        }
-        .sound-btn {
-            position: absolute;
-            bottom: 12px;
-            right: 12px;
-            background: rgba(255, 255, 255, 0.92);
-            color: #0f2d1a;
-            border: none;
-            padding: 10px 16px;
-            border-radius: 50px;
-            font-size: 0.95em;
-            font-weight: bold;
+            background: transparent;         /* ← было #1a1a1a */
+            background-size: 500% 500%;
+            background-position: center;
+            background-repeat: no-repeat;    /* ← добавили на всякий случай */
             cursor: pointer;
-            box-shadow: 0 4px 14px rgba(0, 0, 0, 0.3);
+            transition: transform 0.15s ease, filter 0.3s ease, opacity 0.3s ease;
+            filter: grayscale(1) brightness(0.55);
+            opacity: 0.75;
+        }
+        
+        /* Выделенная ячейка (первый клик) */
+        .puzzle-cell.selected {
+            outline: 3px solid #00ff7f;
+            outline-offset: -3px;
+            transform: scale(0.95);
+            z-index: 5;
+        }
+
+        /* Когда кусочек встал на место */
+        .puzzle-cell.placed {
+            filter: grayscale(0) brightness(1);
+            opacity: 1;
+            cursor: default;
+        }
+
+        /* Тряска при ошибке */
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            20%      { transform: translateX(-4px); }
+            40%      { transform: translateX(4px); }
+            60%      { transform: translateX(-3px); }
+            80%      { transform: translateX(3px); }
+        }
+        .puzzle-cell.shake {
+            animation: shake 0.35s ease;
+        }
+
+        /* Пульсация собранной фотографии */
+        @keyframes puzzleGlow {
+            0%, 100% { box-shadow: 0 0 24px rgba(0, 255, 100, 0.4); }
+            50%      { box-shadow: 0 0 52px rgba(0, 255, 100, 0.95); }
+        }
+        .puzzle-grid.solved {
+            animation: puzzleGlow 2.4s ease-in-out infinite;
         }
 
         /* ================================================
-           ЛЕТЯЩИЕ СЕРДЕЧКИ / ЧАСТИЦЫ
-           ================================================ */
-        .blob {
-            position: fixed;
-            border-radius: 50%;
-            filter: blur(70px);
-            opacity: 0.35;
-            z-index: 0;
-            pointer-events: none;
-            animation: blobFloat 20s ease-in-out infinite;
-        }
-        .blob-1 {
-            width: 260px; height: 260px;
-            background: #00c853;
-            top: -60px; left: -60px;
-        }
-        .blob-2 {
-                width: 220px; height: 220px;
-            background: #00ff7f;
-            bottom: -50px; right: -50px;
-            animation-delay: -7s;
-        }
-        .blob-3 {
-            width: 180px; height: 180px;
-            background: #00897b;
-            top: 40%; left: 60%;
-            animation-delay: -14s;
-        }
-            @keyframes blobFloat {
-            0%, 100%   { transform: translate(0, 0) scale(1); }
-            33%        { transform: translate(40px, -30px) scale(1.15); }
-            66%        { transform: translate(-30px, 30px) scale(0.95); }
-        }
-        .floating-heart {
-            position: fixed;
-            bottom: -40px;
-            font-size: 24px;
-            opacity: 0.85;
-            animation: floatUp linear forwards;
-            pointer-events: none;
-            z-index: 1;
-        }
-        @keyframes floatUp {
-            to {
-                transform: translateY(-110vh) rotate(360deg);
-                opacity: 0;
-            }
-        }
-    </style>
+   ПИСЬМО
+   ================================================ */
+
+.letter-stage {
+    position: relative;
+    width: 100%;
+    max-width: 320px;
+    margin: 0 auto 180px;
+    height: 520px;
+}
+
+.envelope {
+    position: absolute;
+    left: 0; right: 0; bottom: 0;
+    height: 220px;
+}
+
+/* ===== 1. КАРМАН ===== */
+.env-body {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, #8b1f2e, #6e1420);
+    border-radius: 4px;
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5);
+    z-index: 1;
+    overflow: hidden;
+}
+
+.env-body::after {
+    content: '';
+    position: absolute;
+    left: 0; right: 0; bottom: 0;
+    height: 50%;
+    background: linear-gradient(0deg, rgba(0, 0, 0, 0.2), transparent);
+    border-radius: 0 0 4px 4px;
+    pointer-events: none;
+}
+
+/* ===== 2. БОКОВЫЕ СТВОРКИ ===== */
+/* ===== БОКОВЫЕ СТВОРКИ ===== */
+.env-corner {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 100%;
+    background: linear-gradient(180deg, #8b1f2e 0%, #7a1926 100%);  /* ← как у кармана, почти сливается */
+    z-index: 7;                       /* в закрытом — под клапаном (7) */
+    pointer-events: none;
+}
+
+.env-corner-left {
+    left: 0;
+    /* Треугольник от верхнего левого угла к ЦЕНТРУ кармана */
+    clip-path: polygon(0 0, 50% 50%, 0 100%);
+    /*      ^^^ левый верх → центр (50%,50%) → левый низ */
+}
+
+.env-corner-right {
+    right: 0;
+    /* Треугольник от верхнего правого угла к ЦЕНТРУ */
+    clip-path: polygon(100% 0, 100% 100%, 50% 50%);
+    /*      ^^^ правый верх → правый низ → центр */
+}
+
+/* При открытии — створки поверх листа */
+.envelope.opened .env-corner {
+    z-index: 8;
+}
+
+/* ===== 3. ПОЛОСКИ ===== */
+.env-stripes {
+    position: absolute;
+    top: 110px;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(calc(-50%));
+    display: flex;
+    flex-direction: row;
+    gap: 10px;
+    pointer-events: none;
+    z-index: 7;
+}
+.env-stripes span {
+    display: block;
+    width: 10px;
+    height: 100%;
+    background: #000;
+}
+
+/* ===== 4. ЛИСТ =====
+   Изначально — z-index: 4 (под клапаном, скрыт).
+   При открытии — z-index: 9 (поверх клапана).  */
+.letter-paper {
+    position: absolute;
+    left: 8%;
+    right: 8%;
+    bottom: -30;
+    height: 0;
+    overflow: hidden;
+    background: linear-gradient(180deg, #fdf2f2, #f5dddd);
+    border-radius: 6px 6px 0 0;
+    box-shadow: 0 -6px 24px rgba(0, 0, 0, 0.2);
+    padding: 0 22px;
+    transition: height 1.8s ease, padding 1.8s ease, bottom 1.8s ease;
+    z-index: 5;                       /* ПОД клапаном (5) и кнопкой (10) */
+    pointer-events: none;
+}
+
+/* При открытии конверта — лист идёт ПОВЕРХ клапана */
+.envelope.opened .letter-paper {
+    z-index: 7;                       /* ← выше клапана (5) */
+}
+
+/* Когда лист «выехал» — видна кромка и печатается текст */
+.letter-paper.visible {
+    height: auto;
+    padding: 26px 16px;
+    bottom: 110px;
+}
+
+.letter-paper::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: repeating-linear-gradient(
+        180deg,
+        transparent 0,
+        transparent 27px,
+        rgba(139, 31, 46, 0.12) 27px,
+        rgba(139, 31, 46, 0.12) 28px
+    );
+    pointer-events: none;
+    border-radius: 6px;
+}
+
+/* ===== 5. КЛАПАН ===== */
+.env-flap {
+    position: absolute;
+    left: 0; right: 0;
+    top: 0;
+    height: 110px;
+    background: linear-gradient(180deg, #9b2534 0%, #7a1926 100%);
+    clip-path: polygon(0 0, 100% 0, 50% 100%);
+    transform-origin: top center;
+    transition: transform 0.9s ease;
+    z-index: 7;                       /* ← ВЫШЕ створок (6) в закрытом */
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+    pointer-events: none;
+    overflow: hidden;
+}
+
+/* При открытии — клапан откидывается и уходит под лист */
+.envelope.opened .env-flap {
+    transform: rotateX(-180deg);
+    z-index: 3;
+}
+
+/* Полоски на клапане */
+.env-flap-stripes {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    height: 100%;
+    transform: translateX(calc(-50%));
+    display: flex;
+    flex-direction: row;
+    gap: 10px;
+    pointer-events: none;
+    z-index: 1;
+}
+.env-flap-stripes span {
+    display: block;
+    width: 10px;
+    height: 100%;
+    background: #000;
+}
+
+/* ===== НИЖНЯЯ СТВОРКА (передний карман) ===== */
+.env-front {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 100%;
+    background: linear-gradient(180deg, #a02a38 0%, #7a1926 100%);
+    clip-path: polygon(0 100%, 100% 100%, 80% 45%, 20% 45%);
+    z-index: 6;                        /* ← выше боковых (6) */
+    pointer-events: none;
+}
+
+/* При открытии — на том же уровне, что боковые */
+.envelope.opened .env-front {
+    z-index: 6;
+}
+
+/* ===== 6. КНОПКА ===== */
+.env-btn {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 10;                       /* ← выше всего */
+    background: #c9253a;
+    border: 2px solid #8b1f2e;
+    border-radius: 50%;
+    margin: 0;
+    width: 72px;
+    height: 72px;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: transform 0.25s ease, box-shadow 0.25s ease, background 0.25s ease, opacity 0.4s ease;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.5);
+    animation: envPulse 2.4s ease-in-out infinite;
+    overflow: hidden;
+}
+.env-btn:hover {
+    transform: translate(-50%, -50%) scale(1.08);
+    background: #e02d44;
+}
+.env-btn svg {
+    width: 48px;
+    height: 48px;
+    display: block;
+    color: #000;
+}
+@keyframes envPulse {
+    0%, 100% { box-shadow: 0 6px 20px rgba(0,0,0,0.5), 0 0 0 0 rgba(255, 255, 255, 0.35); }
+    50%      { box-shadow: 0 6px 20px rgba(0,0,0,0.5), 0 0 0 14px rgba(255, 255, 255, 0); }
+}
+
+.envelope.opened .env-btn {
+    opacity: 0;
+    pointer-events: none;
+}
+
+/* ===== ТЕКСТЫ ===== */
+.letter-text {
+    font-family: 'Caveat', 'Comic Sans MS', cursive;
+    font-size: 1.1em;
+    line-height: 28px;
+    color: #2b2317;
+    text-align: left;
+    white-space: pre-wrap;
+    min-height: 30px;
+    position: relative;
+    z-index: 1;
+}
+.letter-sign {
+    font-family: 'Caveat', 'Comic Sans MS', cursive;
+    font-size: 1.3em;
+    color: #0f2d1a;
+    text-align: right;
+    margin-top: 28px;
+    padding-right: 36px;
+    padding-bottom: 28px;      /* ← добавили отступ снизу */
+    opacity: 0;
+    transition: opacity 1.2s ease;
+    position: relative;
+    z-index: 1;
+}
+.letter-sign.show { opacity: 1; }
+
+.letter-text .cursor {
+    display: inline-block;
+    width: 2px;
+    height: 1.1em;
+    background: #0f2d1a;
+    vertical-align: text-bottom;
+    margin-left: 2px;
+    animation: blink 0.8s steps(2) infinite;
+}
+@keyframes blink {
+    0%, 50% { opacity: 1; }
+    51%, 100% { opacity: 0; }
+}
+
+.floating-heart {
+    position: fixed;
+    bottom: -40px;
+    font-size: 24px;
+    opacity: 0.85;
+    animation: floatUp linear forwards;
+    pointer-events: none;
+    z-index: 1;
+}
+@keyframes floatUp {
+    to {
+        transform: translateY(-110vh) rotate(360deg);
+        opacity: 0;
+    }
+}
+
+ </style>
 </head>
 
         <body>
@@ -343,41 +668,124 @@
             <button onclick="goToStep(3)">Дальше →</button>
         </div>
 
-        <!-- ==========================================
-             ШАГ 3: ВИДЕО
-             ========================================== -->
+                <!-- ==========================================
+            ШАГ 3: ПАЗЛ
+            ========================================== -->
         <div class="step" id="step3">
-            <h1>У меня для тебя кое-что есть 🎥</h1>
-            <div class="video-wrap">
-                <video id="giftVideo" src="/static/video.mp4" playsinline preload="metadata" loop></video>
-                <button class="sound-btn" id="soundBtn" onclick="toggleSound()">🔊 Включить звук</button>
+            <h1>🧩 Осталась ещё одна игра</h1>
+            <p class="small" style="margin-bottom: 18px;">
+                Собери это произведение искусства по кусочкам
+            </p>
+
+        <div class="puzzle-wrap">
+            <div class="puzzle-inner">
+                <div class="puzzle-grid" id="puzzleGrid"></div>
+                <img id="puzzleWhole" class="puzzle-whole" src="/static/photo.jpg" alt="">
             </div>
-            <p class="small">Нажми на видео, чтобы включить</p>
-            <br>
-            <button onclick="goToStep(4)">Дальше →</button>
         </div>
 
-        <!-- ==========================================
-             ШАГ 4: ФИНАЛ
-             ========================================== -->
-        <div class="step" id="step4">
-            <div class="heart">🎁</div>
-            <h1>А теперь…</h1>
-            <p style="font-size: 1.15em;">
-                Внутри — сюрприз из твоего любимого мира.<br>
-                Даже если он умрет по сюжету - у тебя он останется жив)<br>
-                И небольшой презент, за то что не получилось с пакетом партии регионов.
-            </p>
-            <p style="font-size: 1.3em; margin-top: 20px;">
-                <b>Открывай, зайка!</b>
-            </p>
-            <button onclick="celebrate()">🤗 Обнять тебя</button>
-            <p class="small" style="margin-top: 22px; opacity: 0.9;">
-                Твой ангел в адидасе ❤️
-            </p>
+            <p class="counter" id="puzzleCounter">Собрано: 0 / 25</p>
+
+            <div id="puzzleFinalMessage" style="display:none;">
+                <p style="font-size: 1.15em; line-height: 1.5; margin-top: 18px; font-style: italic;">
+                    Пусть твои глаза всегда горят как на этой фотокарточке<br>
+                    Чтобы я не мог оторвать от тебя своих
+                </p>
+                <button onclick="goToStep(4)">💌 Открыть письмо</button>
+            </div>
         </div>
 
+       <!-- ==========================================
+     ШАГ 4: ПИСЬМО
+     ========================================== -->
+<div class="step" id="step4">
+
+    <div class="letter-stage">
+
+        <div class="envelope" id="envelope">
+
+    <!-- 1. КАРМАН (задняя часть) -->
+    <div class="env-body"></div>
+
+    <!-- 2. ПОЛОСКИ -->
+    <div class="env-stripes">
+        <span></span>
+        <span></span>
+        <span></span>
     </div>
+
+    <!-- 3. ЛИСТ -->
+    <div class="letter-paper" id="letterPaper">
+        <div class="letter-text" id="letterText"></div>
+        <div class="letter-sign" id="letterSign">Твой ангел в адидасе </div>
+    </div>
+
+    <!-- 4. БОКОВЫЕ СТВОРКИ -->
+    <div class="env-corner env-corner-left"></div>
+    <div class="env-corner env-corner-right"></div>
+
+    <!-- 5. НИЖНЯЯ СТВОРКА (передний карман) -->
+    <div class="env-front"></div>
+
+    <!-- 6. КЛАПАН -->
+    <div class="env-flap">
+        <div class="env-flap-stripes">
+            <span></span>
+            <span></span>
+            <span></span>
+        </div>
+    </div>
+
+    <!-- 7. КНОПКА -->
+<button class="env-btn" id="envBtn" onclick="openEnvelope()" aria-label="Открыть письмо">
+    <svg viewBox="0 0 284.3 276.4" xmlns="http://www.w3.org/2000/svg">
+        <path fill="currentColor" fill-rule="evenodd" clip-rule="evenodd" d="M262.9,128.7c-1.8,3.5-4.9,8.2-7.7,11.1c-225.2,0-225.2,0-225.2,0c-1.8-2.2-5.8-7.3-7.4-11.1H262.9z"/>
+        <path fill="currentColor" fill-rule="evenodd" clip-rule="evenodd" d="M246.1,151.2c-206.8,0-206.8,0-206.8,0c3.3,4,6.8,7.5,10.6,10.1c184.6,0,184.6,0,184.6,0C239.2,158.7,243.4,155.2,246.1,151.2"/>
+        <path fill="currentColor" fill-rule="evenodd" clip-rule="evenodd" d="M220.6,172c-56.8,0-56.8,0-56.8,0c-1.6,9-1.6,17.4-1.6,23.4C178.8,194.3,200.6,186.8,220.6,172"/>
+        <path fill="currentColor" fill-rule="evenodd" clip-rule="evenodd" d="M284,55.3c-25.9,1.6-63.1,19-87.2,47.3c-4.4,5.1-8.4,10.1-11.5,15.5c83.1,0,83.1,0,83.1,0C279.8,95.7,285.6,73.4,284,55.3"/>
+        <path fill="currentColor" fill-rule="evenodd" clip-rule="evenodd" d="M122.8,195.4c0.3-5.9,0.3-14.3-0.9-23.4c-57.2,0-57.2,0-57.2,0C85.1,186.8,106.9,194.3,122.8,195.4"/>
+        <path fill="currentColor" fill-rule="evenodd" clip-rule="evenodd" d="M142.7,197.2c6-6.2,12.2-14.6,17.7-25.2c-35.6,0-35.6,0-35.6,0C130.8,182.6,136.3,191,142.7,197.2"/>
+        <path fill="currentColor" fill-rule="evenodd" clip-rule="evenodd" d="M100.3,118c-3.1-5.3-7.3-10.4-11.5-15.5C64.7,74.3,27.3,56.8,2,55.3c-1.8,18.1,3.9,40.4,15,62.7H100.3z"/>
+        <path fill="currentColor" fill-rule="evenodd" clip-rule="evenodd" d="M178.8,118c0.5-6.4,1.1-12.6,1.1-19.9c0-39.4-17.7-80-37.1-98.1c-19.6,18.1-36.9,58.7-36.9,98.1c0,7.3,0,13.5,1.1,19.9H178.8z"/>
+        <path fill="currentColor" fill-rule="evenodd" clip-rule="evenodd" d="M262.4,276.4c11.7,0,21.6-4.7,21.6-16.6c0-6.6-4.9-11.3-12.4-13c-8-2-17.9-1.8-17.9-6.9c0.5-3.3,3.5-4.2,8.4-4.2c7.3,0,7.6,4,8,6.4c11.9,0,11.9,0,11.9,0c-0.9-9.3-8.4-15.7-20.5-15.7c-12.6,0-19.9,6.9-19.9,15.5c0,5.1,2.6,9.5,6.9,11.7c3,1.6,7.3,2.7,12.4,3.6c5.3,0.4,9.9,0.9,10.4,4.7c0,2.6-2.7,5.7-8.2,5.7c-8.2,0-10-4.7-10-7.8c-12.6,0-12.6,0-12.6,0C240.7,269.7,248.9,276.4,262.4,276.4"/>
+        <path fill="currentColor" fill-rule="evenodd" clip-rule="evenodd" d="M210.4,265.1c-7.6,0-14-6.4-14-13.7c0-7.6,6.4-14,14-14c7.3,0,13.4,6.4,13.4,14C223.9,258.7,217.7,265.1,210.4,265.1z M223.9,227c0,3.6,0,3.6,0,3.6c-4-2.9-8.6-4.3-14.1-4.3c-13.7,0-25.2,11.1-25.2,25c0,13.7,11.5,25,25.2,25c5.5,0,10.1-1.6,14.1-4.3c0,3.1,0,3.1,0,3.1c12.2,0,12.2,0,12.2,0c0-48.2,0-48.2,0-48.2H223.9z"/>
+        <path fill="currentColor" fill-rule="evenodd" clip-rule="evenodd" d="M154.9,265.1c-7.3,0-13.7-6.4-13.7-13.7c0-7.6,6.4-14,13.7-14c7.5,0,13.9,6.4,13.9,14C168.8,258.7,162.4,265.1,154.9,265.1z M168.8,210.5c0,20.1,0,20.1,0,20.1c-4.2-2.9-8.8-4.3-14.1-4.3c-14,0-25,11.1-25,25c0,13.7,11.1,25,25,25c5.3,0,10.1-1.6,14.1-4.3c0,3.1,0,3.1,0,3.1c11.9,0,11.9,0,11.9,0c0-64.7,0-64.7,0-64.7H168.8z"/>
+        <rect x="112.7" y="210.5" fill="currentColor" width="12" height="11.9"/>
+        <rect x="112.7" y="227" fill="currentColor" width="12" height="48.2"/>
+        <path fill="currentColor" fill-rule="evenodd" clip-rule="evenodd" d="M81.1,265.1c-8,0-14.4-6.4-14.4-13.7c0-7.6,6.4-14,14.4-14c7.3,0,13.7,6.4,13.7,14C94.8,258.7,88.4,265.1,81.1,265.1z M94.8,210.5c0,20.1,0,20.1,0,20.1c-4.2-2.9-9-4.3-14.4-4.3c-13.7,0-25.2,11.1-25.2,25c0,13.7,11.5,25,25.2,25c5.3,0,10.2-1.6,14.4-4.3c0,3.1,0,3.1,0,3.1c12.2,0,12.2,0,12.2,0c0-64.7,0-64.7,0-64.7H94.8z"/>
+        <path fill="currentColor" fill-rule="evenodd" clip-rule="evenodd" d="M25.2,265.1c-7.3,0-13.7-6.4-13.7-13.7c0-7.6,6.4-14,13.7-14c8,0,14.4,6.4,14.4,14C39.6,258.7,33.1,265.1,25.2,265.1z M39.6,227c0,3.6,0,3.6,0,3.6c-4.2-2.9-9.3-4.3-14.6-4.3c-13.7,0-25,11.1-25,25c0,13.7,11.3,25,25,25c5.5,0,10.4-1.6,14.6-4.3c0,3.1,0,3.1,0,3.1c11.7,0,11.7,0,11.7,0c0-48.2,0-48.2,0-48.2H39.6z"/>
+    </svg>
+    </button>
+
+</div>
+
+    <div id="letterNextWrap" style="display:none; position: absolute; left: 50%; transform: translateX(-50%); bottom: -140px;">
+    <button onclick="goToStep(5)">Дальше →</button>
+</div>
+</div>
+</div>
+
+
+<!-- ==========================================
+     ШАГ 5: ФИНАЛ
+     ========================================== -->
+<div class="step" id="step5">
+    <div class="heart">🎁</div>
+    <h1>А теперь…</h1>
+    <p style="font-size: 1.1em; line-height: 1.6;">
+        Внутри — конечно, не Черпачок Гычи, не Войлочные катышки,
+        не автограф Дона Окуня и даже не мука с сушёным чесноком…
+        <br><br>
+        Но я уверен, что тебе понравится — потому что это кое-кто
+        <b>из твоего мира</b>.
+        <br><br>
+        И пара приятных плюшек — не мог же я оставить в подарке всего две позиции 😏
+    </p>
+    <p style="font-size: 1.3em; margin-top: 20px; margin-bottom: 22px;">
+        <b>Открывай, зайка!</b>
+    </p>
+    <button onclick="celebrate()">🤗 Обнять тебя 🤗</button>
+</div>
 
     <script>
         /* ============================================================
@@ -405,35 +813,29 @@
            2. УПРАВЛЕНИЕ ЭКРАНАМИ
            ============================================================ */
 
-        function goToStep(n) {
-            // ⬇️ Если уходим с шага 3 (с видео) — глушим видео
-            const step3El = document.getElementById('step3');
-            const videoEl = document.getElementById('giftVideo');
-            if (step3El && videoEl && step3El.classList.contains('active')) {
-                videoEl.pause();
-                videoEl.muted = true;
-                videoEl.currentTime = 0;   // сброс на начало
-                soundOn = false;           // глобальный флаг
-                const sBtn = document.getElementById('soundBtn');
-                if (sBtn) sBtn.textContent = '🔊 Включить звук';
-            }
-
-            document.querySelectorAll('.step').forEach(el => el.classList.remove('active'));
-            const target = n === '2special'
+                    function goToStep(n) {
+            document.querySelectorAll('.step').forEach(function(el) { el.classList.remove('active'); });
+            var target = n === '2special'
                 ? document.getElementById('step2special')
                 : document.getElementById('step' + n);
             if (target) target.classList.add('active');
 
-            const fill = document.getElementById('progressFill');
+            // Если вошли на шаг 3 — строим пазл (один раз)
+            if (n === 3) {
+                buildPuzzle();
+            }
+
+            var fill = document.getElementById('progressFill');
             if (fill) {
-                const progressMap = {
-                    1: 10,
-                    2: 30,
-                    '2special': 55,
-                    3: 75,
-                    4: 100
-                };
-                fill.style.width = (progressMap[n] || 0) + '%';
+                var progressMap = {
+                1: 8,
+                2: 25,
+                '2special': 45,
+                3: 65,
+                4: 85,
+                5: 100
+            };
+fill.style.width = (progressMap[n] || 0) + '%';
             }
 
             spawnHearts(6);
@@ -492,44 +894,343 @@
             }
         }
 
-        /* ============================================================
-           5. ВИДЕО (iPhone-friendly)
-           ============================================================ */
+                /* ============================================================
+   5. ПАЗЛ 4x4 (перестановка двух кусочков кликами)
+   ============================================================ */
 
-        const video = document.getElementById('giftVideo');
-        let soundOn = false;
+const PUZZLE_SIZE = 5;
+const PUZZLE_TOTAL = PUZZLE_SIZE * PUZZLE_SIZE;
+const PUZZLE_IMAGE = "/static/photo.jpg";
 
-        function toggleSound() {
-            soundOn = !soundOn;
-            video.muted = !soundOn;
-            document.getElementById('soundBtn').textContent = soundOn ? '🔇 Выключить звук' : '🔊 Включить звук';
-            // если видео на паузе — запускаем
-            if (video.paused) video.play();
+let puzzlePlaced = 0;
+let puzzleLocked = false;
+let selectedCell = null;   // ячейка, которую выделили первым кликом
+
+const clickSound = new Audio('/static/click.mp3');
+clickSound.volume = 0.4;
+const winSound = new Audio('/static/win.mp3');
+winSound.volume = 0.6;
+
+function playSound(audio) {
+    try {
+        audio.currentTime = 0;
+        audio.play().catch(function() {});
+    } catch (e) { }
+}
+
+/* Перемешиваем массив 0..15 так, чтобы НЕ все оказались на своих местах */
+function shuffleOrder() {
+    var arr = [];
+    for (var i = 0; i < PUZZLE_TOTAL; i++) arr.push(i);
+
+    // Перемешиваем Фишером-Йетсом
+    for (var i = arr.length - 1; i > 0; i--) {
+        var j = Math.floor(Math.random() * (i + 1));
+        var tmp = arr[i]; arr[i] = arr[j]; arr[j] = tmp;
+    }
+
+    // Если случайно так вышло, что хотя бы один кусочек уже на своём месте — тасуем ещё раз
+    var fixedCount = 0;
+    for (var i = 0; i < arr.length; i++) {
+        if (arr[i] === i) fixedCount++;
+    }
+    // Хотим, чтобы изначально было 0..2 кусочка на местах (не идеально, но ок)
+    if (fixedCount > 3) return shuffleOrder();
+    return arr;
+}
+
+/* Ставим фон для ячейки в зависимости от того, какой кусочек в ней лежит */
+function setCellPiece(cell, pieceIndex) {
+    var col = pieceIndex % PUZZLE_SIZE;
+    var row = Math.floor(pieceIndex / PUZZLE_SIZE);
+    var xPercent = (col / (PUZZLE_SIZE - 1)) * 100;
+    var yPercent = (row / (PUZZLE_SIZE - 1)) * 100;
+
+    cell.style.backgroundImage = "url('" + PUZZLE_IMAGE + "')";
+    cell.style.backgroundPosition = xPercent + "% " + yPercent + "%";
+    cell.dataset.currentPiece = pieceIndex;
+}
+
+/* Если кусочек лежит в ячейке, где должен быть — фиксируем */
+function checkIfPlaced(cell) {
+    var currentPiece = parseInt(cell.dataset.currentPiece);
+    var correctPiece = parseInt(cell.dataset.correctPiece);
+
+    if (currentPiece === correctPiece && cell.dataset.placed !== '1') {
+        cell.dataset.placed = '1';
+        cell.classList.add('placed');
+        puzzlePlaced++;
+        document.getElementById('puzzleCounter').textContent =
+            'Собрано: ' + puzzlePlaced + ' / ' + PUZZLE_TOTAL;
+        spawnHearts(4);
+        playSound(clickSound);
+
+        if (puzzlePlaced === PUZZLE_TOTAL) {
+            onPuzzleSolved();
+        }
+    }
+}
+
+/* Снимаем фиксацию с ячейки, если из неё убрали кусочек */
+function unfixCell(cell) {
+    if (cell.dataset.placed === '1') {
+        cell.dataset.placed = '0';
+        cell.classList.remove('placed');
+        puzzlePlaced--;
+        document.getElementById('puzzleCounter').textContent =
+            'Собрано: ' + puzzlePlaced + ' / ' + PUZZLE_TOTAL;
+    }
+}
+
+/* Строим пазл при первом входе на шаг 3 */
+function buildPuzzle() {
+    var grid = document.getElementById('puzzleGrid');
+    if (!grid) return;
+    if (grid.children.length > 0) return;   // уже построен
+
+    var order = shuffleOrder();
+
+    for (var i = 0; i < PUZZLE_TOTAL; i++) {
+        var cell = document.createElement('div');
+        cell.className = 'puzzle-cell';
+        cell.dataset.correctPiece = i;       // правильный кусочек для этой ячейки
+        cell.dataset.placed = '0';
+
+        setCellPiece(cell, order[i]);
+
+        cell.addEventListener('click', function() { onPuzzleClick(this); }.bind(cell));
+        // ↑ bind(cell) — чтобы this внутри обработчика был самой ячейкой
+        //    (на старых браузерах без bind можно использовать стрелочную функцию)
+
+        grid.appendChild(cell);
+
+        // Сразу проверим — вдруг случайно кусочек на своём месте
+        checkIfPlaced(cell);
+    }
+}
+
+/* Клик по ячейке — выделяем / меняем местами */
+function onPuzzleClick(cell) {
+    if (puzzleLocked) return;
+    if (cell.dataset.placed === '1') return;   // уже зафиксирован
+
+    // Никого ещё не выбрали — выделяем эту ячейку
+    if (!selectedCell) {
+        selectedCell = cell;
+        cell.classList.add('selected');
+        return;
+    }
+
+    // Кликнули по той же ячейке — снимаем выделение
+    if (selectedCell === cell) {
+        cell.classList.remove('selected');
+        selectedCell = null;
+        return;
+    }
+
+    // Кликнули по другой ячейке — меняем местами кусочки
+    var a = selectedCell;
+    var b = cell;
+
+    var pieceA = a.dataset.currentPiece;
+    var pieceB = b.dataset.currentPiece;
+
+    // Снимаем фиксацию (если была) — потому что кусочки переезжают
+    unfixCell(a);
+    unfixCell(b);
+
+    // Меняем местами
+    setCellPiece(a, parseInt(pieceB));
+    setCellPiece(b, parseInt(pieceA));
+
+    // Убираем выделение
+    a.classList.remove('selected');
+    selectedCell = null;
+
+    // Проверяем: не встали ли кусочки на свои места
+    checkIfPlaced(a);
+    checkIfPlaced(b);
+}
+
+/* Пазл собран! */
+function onPuzzleSolved() {
+    puzzleLocked = true;
+
+    var grid = document.getElementById('puzzleGrid');
+    var whole = document.getElementById('puzzleWhole');
+
+    // 1. Сначала лёгкое свечение сетки — 0.4 секунды
+    grid.classList.add('solved');
+
+    // 2. Через 0.6 сек — «склеиваем»: плавно убираем швы
+    setTimeout(function() {
+        // Убираем gap между ячейками
+        grid.style.gap = '0px';
+        grid.style.background = 'transparent';
+
+        // Кусочки — убираем серость, делаем их ровными и без выделения
+        document.querySelectorAll('.puzzle-cell').forEach(function(c) {
+            c.style.transition = 'none';
+        });
+
+        // Убираем серую обводку у выделенной (если осталась)
+        var selected = document.querySelector('.puzzle-cell.selected');
+        if (selected) selected.classList.remove('selected');
+    }, 600);
+
+    // 3. Через 1.1 сек — поверх сетки проявляется целое фото
+    setTimeout(function() {
+        whole.classList.add('show');
+        playSound(winSound);
+        spawnHearts(60);
+    }, 1100);
+
+    // 4. Через 2 сек — появляется финальная надпись и кнопка
+    setTimeout(function() {
+        document.getElementById('puzzleFinalMessage').style.display = 'block';
+        spawnHearts(20);
+    }, 2000);
+}
+
+
+/* ============================================================
+   5.5. ПИСЬМО
+   ============================================================ */
+
+// ⚠️ Текст письма — с \n для переносов
+const LETTER_TEXT =
+    "Знаешь, я до сих пор не могу поверить, что ты появилась в моей жизни. " +
+    "С первой нашей встречи ты подарила мне чувство спокойствия и безопасности. " +
+    "Рядом с тобой я смог быть самим собой — без масок, без притворства.\n\n" +
+    "Ты самая красивая, самая добрая и самая настоящая. " +
+    "Ты — как тот чай из детства: тепло, знакомо и по-своему. " +
+    "А когда ты гладишь меня по спине — весь мир на секунду затихает, " +
+    "и становится легче дышать. Я очень это ценю. " +
+    "И я хочу, чтобы ты знала: я всегда рядом, чтобы ответить тебе тем же.\n\n" +
+    "В твой день рождения хочу пожелать одного: чтобы твоя улыбка не гасла. " +
+    "Чтобы никто и ничто не смогло её украсть. " +
+    "А я буду делать всё, что в моих силах, чтобы ты чувствовала себя самой счастливой.";
+
+const LETTER_SPEED = 45;              // мс на символ. Меньше = быстрее
+
+// Аудио
+const penSound = new Audio('/static/pen.mp3');
+penSound.loop = true;
+penSound.volume = 0.25;
+const musicSound = new Audio('/static/music.mp3');
+musicSound.loop = true;
+musicSound.volume = 0.35;
+
+let letterStarted = false;
+
+/* Плавное затухание звука */
+function fadeAudio(audio, targetVolume, duration) {
+    var steps = 30;
+    var stepTime = duration / steps;
+    var startVolume = audio.volume;
+    var diff = targetVolume - startVolume;
+
+    if (audio._fadeInterval) clearInterval(audio._fadeInterval);
+    var i = 0;
+    audio._fadeInterval = setInterval(function() {
+        i++;
+        audio.volume = Math.max(0, Math.min(1, startVolume + diff * (i / steps)));
+        if (i >= steps) {
+            clearInterval(audio._fadeInterval);
+            if (targetVolume === 0) audio.pause();
+        }
+    }, stepTime);
+}
+
+/* Открытие конверта */
+function openEnvelope() {
+    if (letterStarted) return;
+    letterStarted = true;
+
+    var envelope = document.getElementById('envelope');
+    envelope.classList.add('opened');
+
+    setTimeout(function() {
+        var paper = document.getElementById('letterPaper');
+        paper.classList.add('visible');
+    }, 900);
+
+    // Запускаем ТОЛЬКО фоновую музыку — сразу при клике
+    try {
+        musicSound.volume = 0.35;
+        musicSound.currentTime = 0;
+        musicSound.play().catch(function(){});
+    } catch(e) {}
+
+    // Звук пера НЕ запускаем здесь — он стартует в startTyping
+    // (то есть в момент, когда лист уже выехал и вот-вот начнётся печать)
+
+    setTimeout(function() {
+        startTyping();
+    }, 2700);
+}
+
+/* Печать текста по буквам */
+function startTyping() {
+try {
+        penSound.volume = 0.25;
+        penSound.currentTime = 0;
+        penSound.play().catch(function(){});
+    } catch(e) {}
+
+    var el = document.getElementById('letterText');
+    el.innerHTML = '';
+    var el = document.getElementById('letterText');
+    el.innerHTML = '';
+
+    // Курсор
+    var cursor = document.createElement('span');
+    cursor.className = 'cursor';
+    el.appendChild(cursor);
+
+    var i = 0;
+    var len = LETTER_TEXT.length;
+    var stopped = false;   // защита от двойного запуска
+
+    function typeNext() {
+        if (stopped) return;
+
+        if (i >= len) {
+            cursor.remove();
+
+            setTimeout(function() { fadeAudio(penSound, 0, 1500); }, 300);
+            setTimeout(function() {
+                document.getElementById('letterSign').classList.add('show');
+            }, 600);
+            setTimeout(function() {
+                document.getElementById('letterNextWrap').style.display = 'block';
+            }, 1600);
+            setTimeout(function() {
+                fadeAudio(musicSound, 0.12, 3000);
+            }, 2000);
+            return;
         }
 
-        // При входе на шаг 3 — пробуем автоплей без звука (сработает на iPhone)
-        // Наблюдаем за переключением на шаг 3 через MutationObserver,
-        // чтобы не плодить отдельные функции.
-        const observer = new MutationObserver(() => {
-            const step3 = document.getElementById('step3');
-            if (step3.classList.contains('active')) {
-                video.muted = true;
-                soundOn = false;
-                document.getElementById('soundBtn').textContent = '🔊 Включить звук';
-                video.play().catch(() => {
-                    // автоплей заблокирован — ничего, пользователь нажмёт сам
-                });
-            }
-        });
-        document.querySelectorAll('.step').forEach(el => {
-            observer.observe(el, { attributes: true, attributeFilter: ['class'] });
-        });
+        var ch = LETTER_TEXT[i];
+        cursor.insertAdjacentText('beforebegin', ch);
+        i++;
 
-        // Тап по самому видео — toggle play/pause
-        video.addEventListener('click', () => {
-            if (video.paused) video.play();
-            else video.pause();
-        });
+        var delay = LETTER_SPEED;
+
+        // Проверяем именно символы, а не коды — чтобы избежать проблем с Unicode
+        if (ch === ',' || ch === '—' || ch === '-') delay = LETTER_SPEED * 6;
+        else if (ch === '.' || ch === '!' || ch === '?') delay = LETTER_SPEED * 10;
+        else if (ch === '\n') delay = LETTER_SPEED * 8;
+
+        // Максимум 1 секунда задержки — на всякий случай
+        if (delay > 1000) delay = 1000;
+
+        setTimeout(typeNext, delay);
+    }
+
+    typeNext();
+}
+
 
         /* ============================================================
            6. ЛЕТЯЩИЕ СЕРДЕЧКИ / ЧАСТИЦЫ
@@ -550,13 +1251,13 @@
             }
         }
 
-        /* ============================================================
-           7. ФИНАЛЬНЫЙ ЗАЛП
-           ============================================================ */
+/* ============================================================
+   7. ФИНАЛЬНЫЙ ЗАЛП
+   ============================================================ */
 
-        function celebrate() {
-            spawnHearts(70);
-        }
+function celebrate() {
+    spawnHearts(100);
+}
 
         /* ============================================================
            8. ЧТО-ТО ПРИ ЗАГРУЗКЕ
